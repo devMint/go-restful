@@ -67,14 +67,17 @@ type Response interface {
 	StatusCode() int
 	GetJSON() string
 	GetXML() string
+
+	Header
 }
 
 type errorMessage struct {
-	XMLName xml.Name `json:"-" xml:"response"`
-	Type    string   `json:"type,omitempty" xml:"type"`
-	Title   string   `json:"title" xml:"title"`
-	Detail  string   `json:"detail" xml:"detail"`
-	Status  int      `json:"status" xml:"status"`
+	rawHeaders `json:"-" xml:"-"`
+	XMLName    xml.Name `json:"-" xml:"response"`
+	Type       string   `json:"type,omitempty" xml:"type"`
+	Title      string   `json:"title" xml:"title"`
+	Detail     string   `json:"detail" xml:"detail"`
+	Status     int      `json:"status" xml:"status"`
 }
 
 func (e errorMessage) StatusCode() int { return e.Status }
@@ -83,10 +86,13 @@ func (e errorMessage) GetJSON() string { return toJSON(e) }
 
 func (e errorMessage) GetXML() string { return toXML(e) }
 
+func (e errorMessage) Error() string { return e.Detail }
+
 type dataResponse struct {
-	XMLName xml.Name    `json:"-" xml:"response"`
-	Data    interface{} `json:"data" xml:"data"`
-	Status  int         `json:"-" xml:"-"`
+	rawHeaders `json:"-" xml:"-"`
+	XMLName    xml.Name    `json:"-" xml:"response"`
+	Data       interface{} `json:"data" xml:"data"`
+	Status     int         `json:"-" xml:"-"`
 }
 
 func (o dataResponse) StatusCode() int { return o.Status }
@@ -95,8 +101,8 @@ func (o dataResponse) GetJSON() string { return toJSON(o) }
 
 func (o dataResponse) GetXML() string { return toXML(o) }
 
-func createDataResponse(statusCode int, renderBody bool) func(data ...interface{}) dataResponse {
-	return func(data ...interface{}) dataResponse {
+func createDataResponse(statusCode int, renderBody bool) func(data ...interface{}) Response {
+	return func(data ...interface{}) Response {
 		var body interface{}
 		if renderBody && len(data) == 1 {
 			body = data[0]
@@ -106,19 +112,26 @@ func createDataResponse(statusCode int, renderBody bool) func(data ...interface{
 		}
 
 		return dataResponse{
-			Data:   body,
-			Status: statusCode,
+			Data:       body,
+			Status:     statusCode,
+			rawHeaders: rawHeaders{},
 		}
 	}
 }
 
-func createErrorResponse(statusCode int) func(err error) errorMessage {
-	return func(err error) errorMessage {
+func createErrorResponse(statusCode int) func(err error) Response {
+	return func(err error) Response {
+		errResponse, ok := err.(errorMessage)
+		if ok {
+			return errResponse
+		}
+
 		return errorMessage{
-			Type:   "http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html",
-			Title:  http.StatusText(statusCode),
-			Status: statusCode,
-			Detail: err.Error(),
+			Type:       "http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html",
+			Title:      http.StatusText(statusCode),
+			Status:     statusCode,
+			Detail:     err.Error(),
+			rawHeaders: rawHeaders{},
 		}
 	}
 }

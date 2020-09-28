@@ -76,3 +76,31 @@ func Test_RouteNested(t *testing.T) {
 
 	assert.Equal(t, "{\"data\":\"b\"}", responseB.Body.String())
 }
+
+func Benchmark_GetRoute(b *testing.B) {
+	router := NewRouter()
+	router.Get("/", func(r request.Request) response.Response {
+		return response.Ok("test")
+	})
+
+	for i := 0; i < b.N; i++ {
+		response := httptest.NewRecorder()
+		request, _ := http.NewRequest("GET", "/", nil)
+		router.ServeHTTP(response, request)
+	}
+}
+
+func Benchmark_GetRoute_WithContext(b *testing.B) {
+	router := NewRouter()
+	router.With(func(r request.Request) (context.Context, response.Response) {
+		return context.WithValue(r.Context(), "test", "test2"), nil
+	}).Get("/", func(r request.Request) response.Response {
+		return response.Ok(r.Context().Value("test"))
+	})
+
+	for i := 0; i < b.N; i++ {
+		response := httptest.NewRecorder()
+		request, _ := http.NewRequest("GET", "/", nil)
+		router.ServeHTTP(response, request)
+	}
+}

@@ -1,7 +1,9 @@
 package request
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -83,6 +85,38 @@ func Test_Context_InValid(t *testing.T) {
 	assert.Equal(t, "application/json", response.Header().Get("content-type"))
 }
 
+func Test_CustomHeaders(t *testing.T) {
+	handler := http.HandlerFunc(HandleAction(customHeaders))
+
+	request, _ := http.NewRequest("GET", "/", nil)
+	request.Header.Set("content-type", "application/json")
+	response := httpResponse(handler, request)
+
+	assert.Equal(t, "dolor-sit-amet", response.Header().Get("lorem-ipsum"))
+}
+
+func Test_ParseBody(t *testing.T) {
+	handler := http.HandlerFunc(HandleAction(bodyToResponse))
+	body, _ := json.Marshal(map[string]string{"a": "lorem-ipsum"})
+
+	request, _ := http.NewRequest("POST", "/", bytes.NewReader(body))
+	request.Header.Set("content-type", "application/json")
+	response := httpResponse(handler, request)
+
+	assert.Equal(t, "{\"data\":{\"a\":\"lorem-ipsum\"}}", response.Body.String())
+}
+
+func Test_ParseBody_WithValidation(t *testing.T) {
+	handler := http.HandlerFunc(HandleAction(bodyToResponseWithValidation))
+	body, _ := json.Marshal(map[string]string{"a": "lorem-ipsum"})
+
+	request, _ := http.NewRequest("POST", "/", bytes.NewReader(body))
+	request.Header.Set("content-type", "application/json")
+	response := httpResponse(handler, request)
+
+	assert.Contains(t, response.Body.String(), "Key: 'customBody.A' Error:Field validation for 'A' failed on the 'iscolor' tag")
+}
+
 func collectionHandler(r Request) response.Response {
 	ctx := r.Context()
 	if ctx.Value("valid") == nil {
@@ -94,6 +128,31 @@ func collectionHandler(r Request) response.Response {
 
 func notFoundHandler(r Request) response.Response {
 	return response.NotFound(errFoo)
+}
+
+func customHeaders(r Request) response.Response {
+	w := response.BadRequest(errFoo)
+	w.WithHeader("lorem-ipsum", "dolor-sit-amet")
+
+	return w
+}
+
+func bodyToResponse(r Request) response.Response {
+	body := customBody{}
+	if err := r.Body(&body); err != nil {
+		return response.BadRequest(err)
+	}
+
+	return response.Ok(body)
+}
+
+func bodyToResponseWithValidation(r Request) response.Response {
+	body := customBody{}
+	if err := r.BodyWithValidation(&body); err != nil {
+		return response.BadRequest(err)
+	}
+
+	return response.Ok(body)
 }
 
 func validContext(r Request) (context.Context, response.Response) {
@@ -109,4 +168,8 @@ func httpResponse(handler http.HandlerFunc, req *http.Request) *httptest.Respons
 
 	handler(w, req)
 	return w
+}
+
+type customBody struct {
+	A string `json:"a" xml:"a" validate:"iscolor"`
 }

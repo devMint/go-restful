@@ -43,3 +43,12 @@ func Test_EncodeError_ToJSON(t *testing.T) {
 func Test_EncodeError_ToXML(t *testing.T) {
 	assert.Equal(t, errorsXML, NotFound(errorsMsg).GetXML())
 }
+
+func Test_CustomHeaders(t *testing.T) {
+	r := NotFound(errorsMsg)
+	r.WithHeader("a", "b")
+
+	value, ok := r.Header()["a"]
+	assert.True(t, ok)
+	assert.Equal(t, "b", value)
+}
