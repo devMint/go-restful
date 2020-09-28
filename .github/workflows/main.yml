@@ -12,10 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v1
-      - uses: go test ./...
+      - run: go test ./...
   Benchmark:
     runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v1
-      - uses: go test -bench=.
+      - run: go test -bench=.
