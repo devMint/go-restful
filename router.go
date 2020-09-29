@@ -41,8 +41,8 @@ type restfulRouter struct {
 	r chi.Router
 }
 
-func NewRouter() Router {
-	return restfulRouter{r: chi.NewMux()}
+func NewRouter(plainRouter chi.Router) Router {
+	return restfulRouter{r: plainRouter}
 }
 
 func (router restfulRouter) Use(middlewares ...request.ContextHandler) {

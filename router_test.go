@@ -8,11 +8,12 @@ import (
 
 	"github.com/devMint/go-restful/request"
 	"github.com/devMint/go-restful/response"
+	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_GetRoute(t *testing.T) {
-	router := NewRouter()
+	router := NewRouter(chi.NewMux())
 	router.Get("/", func(r request.Request) response.Response {
 		return response.Ok("test")
 	})
@@ -26,7 +27,7 @@ func Test_GetRoute(t *testing.T) {
 }
 
 func Test_GetRoute_WithContext(t *testing.T) {
-	router := NewRouter()
+	router := NewRouter(chi.NewMux())
 	router.With(func(r request.Request) (context.Context, response.Response) {
 		return context.WithValue(r.Context(), "test", "test2"), nil
 	}).Get("/", func(r request.Request) response.Response {
@@ -42,7 +43,7 @@ func Test_GetRoute_WithContext(t *testing.T) {
 }
 
 func Test_GroupRoute(t *testing.T) {
-	router := NewRouter()
+	router := NewRouter(chi.NewMux())
 	router.Group(func(r Router) {
 		router.Get("/", func(request.Request) response.Response { return response.Ok("ok") })
 	})
@@ -56,7 +57,7 @@ func Test_GroupRoute(t *testing.T) {
 }
 
 func Test_RouteNested(t *testing.T) {
-	router := NewRouter()
+	router := NewRouter(chi.NewMux())
 	router.Route("/path", func(r Router) {
 		r.Get("/a", func(request.Request) response.Response { return response.Ok("a") })
 		r.Post("/b", func(request.Request) response.Response { return response.Ok("b") })
@@ -78,7 +79,7 @@ func Test_RouteNested(t *testing.T) {
 }
 
 func Benchmark_GetRoute(b *testing.B) {
-	router := NewRouter()
+	router := NewRouter(chi.NewMux())
 	router.Get("/", func(r request.Request) response.Response {
 		return response.Ok("test")
 	})
@@ -91,7 +92,7 @@ func Benchmark_GetRoute(b *testing.B) {
 }
 
 func Benchmark_GetRoute_WithContext(b *testing.B) {
-	router := NewRouter()
+	router := NewRouter(chi.NewMux())
 	router.With(func(r request.Request) (context.Context, response.Response) {
 		return context.WithValue(r.Context(), "test", "test2"), nil
 	}).Get("/", func(r request.Request) response.Response {
