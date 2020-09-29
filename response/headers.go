@@ -2,7 +2,7 @@ package response
 
 type rawHeaders map[string]string
 
-type Header interface {
+type header interface {
 	WithHeader(key, value string)
 	Header() rawHeaders
 }

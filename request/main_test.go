@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -117,6 +118,18 @@ func Test_ParseBody_WithValidation(t *testing.T) {
 	assert.Contains(t, response.Body.String(), "Key: 'customBody.A' Error:Field validation for 'A' failed on the 'iscolor' tag")
 }
 
+func Test_Redirect(t *testing.T) {
+	handler := http.HandlerFunc(HandleAction(redirectHandler))
+
+	request, _ := http.NewRequest("GET", "/", nil)
+	request.Header.Set("content-type", "application/json")
+	response := httpResponse(handler, request)
+
+	fmt.Printf("%+v", response.Header())
+
+	assert.Equal(t, "http://www.onet.pl", response.Header().Get("Location"))
+}
+
 func collectionHandler(r Request) response.Response {
 	ctx := r.Context()
 	if ctx.Value("valid") == nil {
@@ -153,6 +166,10 @@ func bodyToResponseWithValidation(r Request) response.Response {
 	}
 
 	return response.Ok(body)
+}
+
+func redirectHandler(r Request) response.Response {
+	return response.MovedPermanently("http://www.onet.pl")
 }
 
 func validContext(r Request) (context.Context, response.Response) {

@@ -12,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v1
+        with:
+          go-version: '1.15.2'
       - run: go mod vendor
       - run: go test ./...
   Benchmark:
@@ -19,5 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v1
+        with:
+          go-version: '1.15.2'
       - run: go mod vendor
       - run: go test -bench=.
