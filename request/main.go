@@ -15,15 +15,21 @@ import (
 
 var validate *validator.Validate
 
+// RestfulHandler replacement for http.HandlerFunc
 type RestfulHandler func(Request) response.Response
-type ContextHandler func(req Request) (context.Context, response.Response)
 
+// ContextHandler special replacement for http.Handler. It's should not be use for middlewares
+// but more with common actions between restful handlers.
+type ContextHandler func(Request) (context.Context, response.Response)
+
+// Request replacement for *http.Request with easy access to most important variables or parameters.
 type Request interface {
 	Param(key string) string
 	Query(key string, onMissing ...string) string
 	Body(typeOfBody interface{}) error
 	BodyWithValidation(typeOfBody interface{}) error
 	Context() context.Context
+	Request() *http.Request
 }
 
 const (
@@ -31,6 +37,7 @@ const (
 	appXML  = "application/xml"
 )
 
+// HandleAction replacement for http.HandlerFunc
 func HandleAction(cb func(req Request) response.Response) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := cb(wrapRequest(r))
@@ -49,6 +56,7 @@ func HandleAction(cb func(req Request) response.Response) http.HandlerFunc {
 	})
 }
 
+// HandleContext replacement for func(http.Handler) http.Handler
 func HandleContext(cb func(req Request) (context.Context, response.Response)) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -116,6 +124,10 @@ func (r nativeRequest) BodyWithValidation(typeOfBody interface{}) error {
 	}
 
 	return r.validator.Struct(typeOfBody)
+}
+
+func (r nativeRequest) Request() *http.Request {
+	return r.request
 }
 
 func wrapRequest(r *http.Request) nativeRequest {

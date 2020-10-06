@@ -1,5 +1,18 @@
 Small wrapper for [go-chi/chi](https://github.com/go-chi/chi) to make HTTP handlers more return-like. It doesn't add new functionality to router, it just allows to easier handle responses.
 
+**This is work in progress package!**
+
+## Summary
+
+* `restful.NewRouter()` requires an instance of `chi.Router`. This allows to use existing router without breaking the whole codebase.
+* existing `chiRouter` remains existing routes and middlewares so it allows you to use `http.Handler` and `http.HandlerFunc` with chi router
+* restful's routes use new `request.ContextAction` and `request.RestfulHandler` definitions:
+
+```go
+type RestfulHandler func(Request) response.Response
+type ContextHandler func(Request) (context.Context, response.Response)
+```
+
 ## Examples
 
 ```go
