@@ -8,25 +8,25 @@ package main
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
-  "github.com/go-chi/chi/middleware"
 	"github.com/devMint/go-restful"
 	"github.com/devMint/go-restful/request"
 	"github.com/devMint/go-restful/response"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 func main() {
-  // This is the old way to define router and its handlers.
+	// This is the old way to define router and its handlers.
 	chiRouter := chi.NewRouter()
 	chiRouter.Use(middleware.Logger)
 	chiRouter.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("welcome"))
-  })
-  
-  restfulRouter := restful.NewRouter(chiRouter)
-  restfulRouter.Get("/", func(r request.Request) response.Response {
-    return response.Ok("welcome")
-  })
+	})
+
+	restfulRouter := restful.NewRouter(chiRouter)
+	restfulRouter.Get("/", func(r request.Request) response.Response {
+		return response.Ok("welcome")
+	})
 
 	// http.ListenAndServe(":3000", chiRouter)
 	http.ListenAndServe(":3000", restfulRouter)
