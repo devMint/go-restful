@@ -230,18 +230,23 @@ func createDataResponse(statusCode int, renderBody bool) func(data ...interface{
 	}
 }
 
-func createErrorResponse(statusCode int) func(err error) Response {
-	return func(err error) Response {
+func createErrorResponse(statusCode int) func(err error, msg ...string) Response {
+	return func(err error, msg ...string) Response {
 		errResponse, ok := err.(errorMessage)
 		if ok {
 			return errResponse
+		}
+
+		errMessage := err.Error()
+		if len(msg) == 1 {
+			errMessage = msg[0]
 		}
 
 		return errorMessage{
 			Type:       "http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html",
 			Title:      http.StatusText(statusCode),
 			Status:     statusCode,
-			Detail:     err.Error(),
+			Detail:     errMessage,
 			rawHeaders: rawHeaders{},
 		}
 	}

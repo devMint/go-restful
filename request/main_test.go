@@ -151,17 +151,19 @@ func customHeaders(r Request) response.Response {
 }
 
 func bodyToResponse(r Request) response.Response {
-	body := customBody{}
+	body := customBodyWithoutValidation{}
 	if err := r.Body(&body); err != nil {
 		return response.BadRequest(err)
 	}
+
+	fmt.Printf("%+v", body)
 
 	return response.Ok(body)
 }
 
 func bodyToResponseWithValidation(r Request) response.Response {
 	body := customBody{}
-	if err := r.BodyWithValidation(&body); err != nil {
+	if err := r.Body(&body); err != nil {
 		return response.BadRequest(err)
 	}
 
@@ -189,4 +191,7 @@ func httpResponse(handler http.HandlerFunc, req *http.Request) *httptest.Respons
 
 type customBody struct {
 	A string `json:"a" xml:"a" validate:"iscolor"`
+}
+type customBodyWithoutValidation struct {
+	A string `json:"a" xml:"a"`
 }

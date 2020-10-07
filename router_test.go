@@ -1,7 +1,10 @@
 package restful
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -40,6 +43,46 @@ func Test_GetRoute_WithContext(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, "{\"data\":\"test2\"}", response.Body.String())
+}
+
+func Test_PostRoute_DefaultValidator(t *testing.T) {
+	router := NewRouter(chi.NewMux())
+	router.Post("/", func(r request.Request) response.Response {
+		body := customBody{}
+		if err := r.Body(&body); err != nil {
+			return response.BadRequest(err)
+		}
+
+		return response.Ok(body.A)
+	})
+
+	body, _ := json.Marshal(map[string]string{"a": "lorem-ipsum"})
+	response := httptest.NewRecorder()
+	request, _ := http.NewRequest("POST", "/", bytes.NewReader(body))
+	router.ServeHTTP(response, request)
+
+	assert.Equal(t, http.StatusOK, response.Code)
+	assert.Equal(t, "{\"data\":\"lorem-ipsum\"}", response.Body.String())
+}
+
+func Test_PostRoute_CustomValidator(t *testing.T) {
+	router := NewRouter(chi.NewMux(), RouterOptions{Validator: customValidator{}})
+	router.Post("/", func(r request.Request) response.Response {
+		body := customBody{}
+		if err := r.Body(&body); err != nil {
+			return response.BadRequest(err)
+		}
+
+		return response.Ok(body.A)
+	})
+
+	body, _ := json.Marshal(map[string]string{"a": "lorem-ipsum"})
+	response := httptest.NewRecorder()
+	request, _ := http.NewRequest("POST", "/", bytes.NewReader(body))
+	router.ServeHTTP(response, request)
+
+	assert.Equal(t, http.StatusBadRequest, response.Code)
+	assert.Contains(t, response.Body.String(), "some-random-error")
 }
 
 func Test_GroupRoute(t *testing.T) {
@@ -105,3 +148,11 @@ func Benchmark_GetRoute_WithContext(b *testing.B) {
 		router.ServeHTTP(response, request)
 	}
 }
+
+type customBody struct {
+	A string `json:"a" xml:"a"`
+}
+
+type customValidator struct{}
+
+func (v customValidator) Struct(s interface{}) error { return errors.New("some-random-error") }

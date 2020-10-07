@@ -41,7 +41,18 @@ type restfulRouter struct {
 	r chi.Router
 }
 
-func NewRouter(plainRouter chi.Router) Router {
+type RouterOptions struct {
+	Validator request.RequestBodyValidation
+}
+
+func NewRouter(plainRouter chi.Router, options ...RouterOptions) Router {
+	if nil != options && len(options) == 1 {
+		singleOption := options[0]
+		if singleOption.Validator != nil {
+			request.RegisterValidator(singleOption.Validator)
+		}
+	}
+
 	return restfulRouter{r: plainRouter}
 }
 
