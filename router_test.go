@@ -17,9 +17,7 @@ import (
 
 func Test_GetRoute(t *testing.T) {
 	router := NewRouter(chi.NewMux())
-	router.Get("/", func(r request.Request) response.Response {
-		return response.Ok("test")
-	})
+	router.Get("/", func(r request.Request) response.Response { return response.Ok("test") })
 
 	response := httptest.NewRecorder()
 	request, _ := http.NewRequest("GET", "/", nil)
@@ -27,6 +25,18 @@ func Test_GetRoute(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, "{\"data\":\"test\"}", response.Body.String())
+}
+
+func Test_GetRoute_Param(t *testing.T) {
+	router := NewRouter(chi.NewMux())
+	router.Get("/{id}", func(r request.Request) response.Response { return response.Ok(r.Param("id")) })
+
+	response := httptest.NewRecorder()
+	request, _ := http.NewRequest("GET", "/12", nil)
+	router.ServeHTTP(response, request)
+
+	assert.Equal(t, http.StatusOK, response.Code)
+	assert.Equal(t, "{\"data\":\"12\"}", response.Body.String())
 }
 
 func Test_GetRoute_WithContext(t *testing.T) {
@@ -56,13 +66,13 @@ func Test_PostRoute_DefaultValidator(t *testing.T) {
 		return response.Ok(body.A)
 	})
 
-	body, _ := json.Marshal(map[string]string{"a": "lorem-ipsum"})
+	body, _ := json.Marshal(map[string]int{"a": 16})
 	response := httptest.NewRecorder()
 	request, _ := http.NewRequest("POST", "/", bytes.NewReader(body))
 	router.ServeHTTP(response, request)
 
 	assert.Equal(t, http.StatusOK, response.Code)
-	assert.Equal(t, "{\"data\":\"lorem-ipsum\"}", response.Body.String())
+	assert.Equal(t, "{\"data\":16}", response.Body.String())
 }
 
 func Test_PostRoute_CustomValidator(t *testing.T) {
@@ -76,7 +86,7 @@ func Test_PostRoute_CustomValidator(t *testing.T) {
 		return response.Ok(body.A)
 	})
 
-	body, _ := json.Marshal(map[string]string{"a": "lorem-ipsum"})
+	body, _ := json.Marshal(map[string]int{"a": 16})
 	response := httptest.NewRecorder()
 	request, _ := http.NewRequest("POST", "/", bytes.NewReader(body))
 	router.ServeHTTP(response, request)
@@ -149,10 +159,30 @@ func Benchmark_GetRoute_WithContext(b *testing.B) {
 	}
 }
 
-type customBody struct {
-	A string `json:"a" xml:"a"`
+func Benchmark_PostRoute_Validation(b *testing.B) {
+	router := NewRouter(chi.NewMux())
+	router.Post("/", func(r request.Request) response.Response {
+		body := customBody{}
+		if err := r.Body(&body); err != nil {
+			return response.BadRequest(err)
+		}
+
+		return response.Ok(body.A)
+	})
+
+	for i := 0; i < b.N; i++ {
+		body, _ := json.Marshal(map[string]int{"a": i})
+
+		response := httptest.NewRecorder()
+		request, _ := http.NewRequest("GET", "/", bytes.NewReader(body))
+		router.ServeHTTP(response, request)
+	}
 }
 
 type customValidator struct{}
 
 func (v customValidator) Struct(s interface{}) error { return errors.New("some-random-error") }
+
+type customBody struct {
+	A int `json:"a" xml:"a" validate:"required,gte=13"`
+}
