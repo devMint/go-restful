@@ -170,6 +170,10 @@ type Response interface {
 
 	header
 }
+type ErrorResponse interface {
+	Response
+	error
+}
 
 type errorMessage struct {
 	rawHeaders `json:"-" xml:"-"`
@@ -230,8 +234,8 @@ func createDataResponse(statusCode int, renderBody bool) func(data ...interface{
 	}
 }
 
-func createErrorResponse(statusCode int) func(err error, msg ...string) Response {
-	return func(err error, msg ...string) Response {
+func createErrorResponse(statusCode int) func(err error, msg ...string) ErrorResponse {
+	return func(err error, msg ...string) ErrorResponse {
 		errResponse, ok := err.(errorMessage)
 		if ok {
 			return errResponse

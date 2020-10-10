@@ -125,14 +125,21 @@ func (r nativeRequest) Body(typeOfBody interface{}) error {
 		err = fmt.Errorf("content type '%s' is unsupoorted", r.request.Header.Get("content-type"))
 	}
 
-	if err == nil {
+	if err == nil && typeOfBody != nil {
 		err = r.validator.Struct(typeOfBody)
+		if _, ok := err.(*validator.InvalidValidationError); ok {
+			err = nil
+		}
 	}
 
 	return err
 }
 
 func wrapRequest(r *http.Request) nativeRequest {
+	if validate == nil {
+		panic("validator is not registered")
+	}
+
 	return nativeRequest{
 		request:   r,
 		validator: validate,

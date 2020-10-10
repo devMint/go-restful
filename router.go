@@ -88,7 +88,7 @@ func (router restfulRouter) Route(pattern string, fn func(r Router)) Router {
 		fn(newRouter)
 	}
 
-	router.Mount(pattern, newRouter)
+	router.r.Mount(pattern, newRouter)
 	return newRouter
 }
 
