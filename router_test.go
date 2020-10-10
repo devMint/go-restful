@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -26,6 +27,18 @@ func Test_GetRoute(t *testing.T) {
 	assert.Equal(t, "{\"data\":\"test\"}", response.Body.String())
 }
 
+func Test_GetRoute_Param(t *testing.T) {
+	router := NewRouter(chi.NewMux())
+	router.Get("/{id}", func(r request.Request) response.Response { return response.Ok(r.Param("id")) })
+
+	response := httptest.NewRecorder()
+	request, _ := http.NewRequest("GET", "/12", nil)
+	router.ServeHTTP(response, request)
+
+	assert.Equal(t, http.StatusOK, response.Code)
+	assert.Equal(t, "{\"data\":\"12\"}", response.Body.String())
+}
+
 func Test_GetRoute_WithContext(t *testing.T) {
 	router := NewRouter(chi.NewMux())
 	router.With(func(r request.Request) (context.Context, response.Response) {
@@ -42,16 +55,44 @@ func Test_GetRoute_WithContext(t *testing.T) {
 	assert.Equal(t, "{\"data\":\"test2\"}", response.Body.String())
 }
 
-func Test_GetRoute_Param(t *testing.T) {
+func Test_PostRoute_DefaultValidator(t *testing.T) {
 	router := NewRouter(chi.NewMux())
-	router.Get("/{id}", func(r request.Request) response.Response { return response.Ok(r.Param("id")) })
+	router.Post("/", func(r request.Request) response.Response {
+		body := customBody{}
+		if err := r.Body(&body); err != nil {
+			return response.BadRequest(err)
+		}
 
+		return response.Ok(body.A)
+	})
+
+	body, _ := json.Marshal(map[string]int{"a": 16})
 	response := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/12", nil)
+	request, _ := http.NewRequest("POST", "/", bytes.NewReader(body))
 	router.ServeHTTP(response, request)
 
 	assert.Equal(t, http.StatusOK, response.Code)
-	assert.Equal(t, "{\"data\":\"12\"}", response.Body.String())
+	assert.Equal(t, "{\"data\":16}", response.Body.String())
+}
+
+func Test_PostRoute_CustomValidator(t *testing.T) {
+	router := NewRouter(chi.NewMux(), RouterOptions{Validator: customValidator{}})
+	router.Post("/", func(r request.Request) response.Response {
+		body := customBody{}
+		if err := r.Body(&body); err != nil {
+			return response.BadRequest(err)
+		}
+
+		return response.Ok(body.A)
+	})
+
+	body, _ := json.Marshal(map[string]int{"a": 16})
+	response := httptest.NewRecorder()
+	request, _ := http.NewRequest("POST", "/", bytes.NewReader(body))
+	router.ServeHTTP(response, request)
+
+	assert.Equal(t, http.StatusBadRequest, response.Code)
+	assert.Contains(t, response.Body.String(), "some-random-error")
 }
 
 func Test_GroupRoute(t *testing.T) {
@@ -137,6 +178,10 @@ func Benchmark_PostRoute_Validation(b *testing.B) {
 		router.ServeHTTP(response, request)
 	}
 }
+
+type customValidator struct{}
+
+func (v customValidator) Struct(s interface{}) error { return errors.New("some-random-error") }
 
 type customBody struct {
 	A int `json:"a" xml:"a" validate:"required,gte=13"`

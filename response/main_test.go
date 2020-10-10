@@ -15,9 +15,10 @@ var (
 	emptyJSON = "{\"data\":null}"
 	emptyXML  = "<response></response>"
 
-	errorsMsg  = errors.New("missing entity")
-	errorsJSON = "{\"type\":\"http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html\",\"title\":\"Not Found\",\"detail\":\"missing entity\",\"status\":404}"
-	errorsXML  = "<response><type>http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html</type><title>Not Found</title><detail>missing entity</detail><status>404</status></response>"
+	errorsMsg        = errors.New("missing entity")
+	errorsJSON       = "{\"type\":\"http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html\",\"title\":\"Not Found\",\"detail\":\"missing entity\",\"status\":404}"
+	errorsJSONCustom = "{\"type\":\"http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html\",\"title\":\"Not Found\",\"detail\":\"not-found-test\",\"status\":404}"
+	errorsXML        = "<response><type>http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html</type><title>Not Found</title><detail>missing entity</detail><status>404</status></response>"
 )
 
 func Test_EncodeResponse_ToJSON(t *testing.T) {
@@ -42,6 +43,10 @@ func Test_EncodeError_ToJSON(t *testing.T) {
 
 func Test_EncodeError_ToXML(t *testing.T) {
 	assert.Equal(t, errorsXML, NotFound(errorsMsg).GetXML())
+}
+
+func Test_EncodeError_ToJSON_CustomMessage(t *testing.T) {
+	assert.Equal(t, errorsJSONCustom, NotFound(errorsMsg, "not-found-test").GetJSON())
 }
 
 func Test_CustomHeaders(t *testing.T) {

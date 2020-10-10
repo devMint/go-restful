@@ -13,7 +13,7 @@ import (
 	"github.com/go-playground/validator"
 )
 
-var validate *validator.Validate
+var validate RequestBodyValidation
 
 // RestfulHandler replacement for http.HandlerFunc
 type RestfulHandler func(Request) response.Response
@@ -27,9 +27,12 @@ type Request interface {
 	Param(key string) string
 	Query(key string, onMissing ...string) string
 	Body(typeOfBody interface{}) error
-	BodyWithValidation(typeOfBody interface{}) error
 	Context() context.Context
 	Request() *http.Request
+}
+
+type RequestBodyValidation interface {
+	Struct(s interface{}) error
 }
 
 const (
@@ -80,8 +83,10 @@ func HandleContext(cb func(req Request) (context.Context, response.Response)) fu
 
 type nativeRequest struct {
 	request   *http.Request
-	validator *validator.Validate
+	validator RequestBodyValidation
 }
+
+func (r nativeRequest) Request() *http.Request { return r.request }
 
 func (r nativeRequest) Context() context.Context { return r.request.Context() }
 
@@ -105,29 +110,26 @@ func (r nativeRequest) Body(typeOfBody interface{}) error {
 		return errors.New("empty body from request")
 	}
 
+	contentType := appJSON
+	if r.request.Header.Get("content-type") != "" {
+		contentType = r.request.Header.Get("content-type")
+	}
+
 	var err error
-	switch r.request.Header.Get("content-type") {
+	switch contentType {
 	case appJSON:
-		json.NewDecoder(body).Decode(&typeOfBody)
+		err = json.NewDecoder(body).Decode(&typeOfBody)
 	case appXML:
-		xml.NewDecoder(body).Decode(&typeOfBody)
+		err = xml.NewDecoder(body).Decode(&typeOfBody)
 	default:
 		err = fmt.Errorf("content type '%s' is unsupoorted", r.request.Header.Get("content-type"))
 	}
 
-	return err
-}
-
-func (r nativeRequest) BodyWithValidation(typeOfBody interface{}) error {
-	if err := r.Body(&typeOfBody); err != nil {
-		return err
+	if err == nil {
+		err = r.validator.Struct(typeOfBody)
 	}
 
-	return r.validator.Struct(typeOfBody)
-}
-
-func (r nativeRequest) Request() *http.Request {
-	return r.request
+	return err
 }
 
 func wrapRequest(r *http.Request) nativeRequest {
@@ -139,6 +141,10 @@ func wrapRequest(r *http.Request) nativeRequest {
 
 func init() {
 	validate = validator.New()
+}
+
+func RegisterValidator(v RequestBodyValidation) {
+	validate = v
 }
 
 func renderJSON(w http.ResponseWriter, r response.Response) {
