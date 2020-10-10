@@ -131,6 +131,28 @@ func Test_RouteNested(t *testing.T) {
 	assert.Equal(t, "{\"data\":\"b\"}", responseB.Body.String())
 }
 
+func Test_RouteNested_SameSlash(t *testing.T) {
+	router := NewRouter(chi.NewMux())
+	router.Get("/", func(request.Request) response.Response { return response.Ok("a") })
+	router.Route("/path", func(r Router) {
+		r.Get("/", func(request.Request) response.Response { return response.Ok("b") })
+	})
+
+	// first request
+	responseA := httptest.NewRecorder()
+	requestA, _ := http.NewRequest("GET", "/path", nil)
+	router.ServeHTTP(responseA, requestA)
+
+	assert.Equal(t, "{\"data\":\"b\"}", responseA.Body.String())
+
+	// second request
+	responseB := httptest.NewRecorder()
+	requestB, _ := http.NewRequest("POST", "/", nil)
+	router.ServeHTTP(responseB, requestB)
+
+	assert.Equal(t, "{\"data\":\"a\"}", responseB.Body.String())
+}
+
 func Benchmark_GetRoute(b *testing.B) {
 	router := NewRouter(chi.NewMux())
 	router.Get("/", func(r request.Request) response.Response {

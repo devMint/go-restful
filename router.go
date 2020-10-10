@@ -83,7 +83,7 @@ func (router restfulRouter) Group(fn func(r Router)) Router {
 }
 
 func (router restfulRouter) Route(pattern string, fn func(r Router)) Router {
-	newRouter := restfulRouter{r: chi.NewMux()}
+	newRouter := NewRouter(chi.NewMux())
 	if fn != nil {
 		fn(newRouter)
 	}
