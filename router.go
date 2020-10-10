@@ -75,7 +75,7 @@ func (router restfulRouter) With(middlewares ...request.ContextHandler) Router {
 }
 
 func (router restfulRouter) Group(fn func(r Router)) Router {
-	newRouter := router.With()
+	newRouter := restfulRouter{r: router.r}
 	if fn != nil {
 		fn(newRouter)
 	}
