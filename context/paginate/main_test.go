@@ -12,7 +12,7 @@ import (
 
 func Test_PaginateContext_WithParams(t *testing.T) {
 	handler := request.HandleAction(paginationHandler)
-	handlerToTest := Paginate(30, 0)(handler)
+	handlerToTest := PaginateNative(30, 0)(handler)
 
 	request, _ := http.NewRequest("GET", "/?take=12&skip=3", nil)
 	request.Header.Set("content-type", "application/json")
@@ -27,7 +27,7 @@ func Test_PaginateContext_WithParams(t *testing.T) {
 
 func Test_PaginateContext_EmptyParams(t *testing.T) {
 	handler := request.HandleAction(paginationHandler)
-	handlerToTest := Paginate(30, 0)(handler)
+	handlerToTest := PaginateNative(30, 0)(handler)
 
 	request, _ := http.NewRequest("GET", "/", nil)
 	request.Header.Set("content-type", "application/json")
@@ -42,7 +42,7 @@ func Test_PaginateContext_EmptyParams(t *testing.T) {
 
 func Test_PaginateContext_InvalidParam(t *testing.T) {
 	handler := request.HandleAction(paginationHandler)
-	handlerToTest := Paginate(30, 0)(handler)
+	handlerToTest := PaginateNative(30, 0)(handler)
 
 	request, _ := http.NewRequest("GET", "/?take=a", nil)
 	request.Header.Set("content-type", "application/json")
