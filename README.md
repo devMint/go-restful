@@ -1,6 +1,20 @@
-Small wrapper for [go-chi/chi](https://github.com/go-chi/chi) to make HTTP handlers more return-like. It doesn't add new functionality to router, it just allows to easier handle responses.
+<div align="center">
+    <img src="https://gitlab.com/devmint/go-restful/raw/master/logo.png" alt="Go RESTFul" />
+</div>
 
-**This is work in progress package!**
+<div align="center">
+    <strong>Small wrapper for [go-chi/chi](https://github.com/go-chi/chi) to make HTTP handlers more return-like. It doesn't add new functionality to router, it just allows to easier handle responses.</strong>
+    <br />
+    <br />
+</div>
+
+<div align="center">
+  <img src="https://img.shields.io/badge/Lang-GO-%2329BEB0?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/GO-v1.15-%2329BEB0?style=for-the-badge" />
+</div>
+
+<br />
+<br />
 
 ## Summary
 
@@ -21,9 +35,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/devMint/go-restful"
-	"github.com/devMint/go-restful/request"
-	"github.com/devMint/go-restful/response"
+	"gitlab.com/devmint/go-restful"
+	"gitlab.com/devmint/go-restful/request"
+	"gitlab.com/devmint/go-restful/response"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )

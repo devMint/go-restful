@@ -1,0 +1,16 @@
+image: golang:1.15.5
+stages:
+  - test
+
+before_script:
+  - go mod vendor
+
+unit tests:
+  stage: test
+  script:
+    - go test ./... -v -cover
+
+benchmark:
+  stage: test
+  script:
+    - go test -bench=.
