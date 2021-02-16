@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://gitlab.com/devmint/go-restful/raw/master/logo.png" alt="Go RESTFul" />
+    <img src="./logo.png" alt="Go RESTFul" />
 </div>
 
 <div align="center">
@@ -10,7 +10,6 @@
 
 <div align="center">
   <img src="https://img.shields.io/badge/Lang-GO-%2329BEB0?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/GO-v1.15-%2329BEB0?style=for-the-badge" />
 </div>
 
 <br />

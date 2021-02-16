@@ -1,16 +1,8 @@
 image: golang:1.15.5
+
+include:
+  - project: 'devmint/gitlab-templates'
+    file: '/templates/golang/quality-checking.yml'
+
 stages:
   - test
-
-before_script:
-  - go mod vendor
-
-unit tests:
-  stage: test
-  script:
-    - go test ./... -v -cover
-
-benchmark:
-  stage: test
-  script:
-    - go test -bench=.
