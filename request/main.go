@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/devMint/go-restful/response"
 	"github.com/go-chi/chi"
 	"github.com/go-playground/validator"
+	"gitlab.com/devmint/go-restful/response"
 )
 
 var validate RequestBodyValidation

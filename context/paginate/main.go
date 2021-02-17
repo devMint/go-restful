@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/devMint/go-restful/request"
-	"github.com/devMint/go-restful/response"
+	"gitlab.com/devmint/go-restful/request"
+	"gitlab.com/devmint/go-restful/response"
 )
 
 const (

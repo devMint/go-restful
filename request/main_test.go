@@ -10,8 +10,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/devMint/go-restful/response"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/devmint/go-restful/response"
 )
 
 const (

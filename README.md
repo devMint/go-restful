@@ -18,7 +18,7 @@
 ## Summary
 
 * `restful.NewRouter()` requires an instance of `chi.Router`. This allows to use existing router without breaking the whole codebase.
-* existing `chiRouter` remains existing routes and middlewares so it allows you to use `http.Handler` and `http.HandlerFunc` with chi router
+* existing `chi.Router` remains existing routes and middlewares so it allows you to use `http.Handler` and `http.HandlerFunc` with chi router
 * restful's routes use new `request.ContextAction` and `request.RestfulHandler` definitions:
 
 ```go

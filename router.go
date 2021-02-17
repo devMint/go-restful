@@ -3,8 +3,8 @@ package restful
 import (
 	"net/http"
 
-	"github.com/devMint/go-restful/request"
 	"github.com/go-chi/chi"
+	"gitlab.com/devmint/go-restful/request"
 )
 
 type Router interface {

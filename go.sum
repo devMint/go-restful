@@ -1,5 +1,7 @@
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/devMint/go-restful v0.0.0-20210216203339-f927b1a8a23b h1:iAQ4GWLSSl/LrYQez5oySojbrBv8rETkBB722D8o/lg=
+github.com/devMint/go-restful v0.0.0-20210216203339-f927b1a8a23b/go.mod h1:eg5f62XNTLGLmK8lM1HugPM1XPTLkoXwbOrMiHpWMaU=
 github.com/go-chi/chi v4.1.2+incompatible h1:fGFk2Gmi/YKXk0OmGfBh0WgmN3XB8lVnEyNz34tQRec=
 github.com/go-chi/chi v4.1.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-playground/locales v0.13.0 h1:HyWk6mgj5qFqCT5fjGBuRArbVDfE4hi8+e8ceBS/t7Q=

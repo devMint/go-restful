@@ -9,10 +9,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/devMint/go-restful/request"
-	"github.com/devMint/go-restful/response"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/devmint/go-restful/request"
+	"gitlab.com/devmint/go-restful/response"
 )
 
 func Test_GetRoute(t *testing.T) {

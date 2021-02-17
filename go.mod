@@ -1,12 +1,10 @@
-module github.com/devMint/go-restful
+module gitlab.com/devmint/go-restful
 
 go 1.15
 
 require (
+	github.com/devMint/go-restful v0.0.0-20210216203339-f927b1a8a23b // indirect
 	github.com/go-chi/chi v4.1.2+incompatible
-	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/stretchr/testify v1.6.1
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
